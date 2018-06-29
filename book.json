@@ -4,7 +4,7 @@
   "author": "Sean.Xiao<jxzsxsp@qq.com>",
   "language": "zh",
   "keywords": [
-    "ava并发编程"
+    "Java并发编程"
   ],
   "ignores": ["_book", ".idea", "node_modules"],
   "sortedBy": "-",
