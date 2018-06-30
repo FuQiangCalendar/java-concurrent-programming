@@ -1,0 +1,602 @@
+
+<!DOCTYPE HTML>
+<html lang="zh" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>理解线程上下文切换 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="Sean.Xiao<jxzsxsp@qq.com>">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="../08-线程死锁/readme.html" />
+    
+    
+    <link rel="prev" href="../06-线程中断/readme.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="輸入並搜尋" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../../">
+            
+                <a href="../../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../readme.html">
+            
+                <a href="../readme.html">
+            
+                    
+                    线程基础
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="../01-线程创建与运行/readme.html">
+            
+                <a href="../01-线程创建与运行/readme.html">
+            
+                    
+                    线程创建与运行
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="../02-线程通知与等待/readme.html">
+            
+                <a href="../02-线程通知与等待/readme.html">
+            
+                    
+                    线程通知与等待
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="../03-线程的虚假唤醒/readme.html">
+            
+                <a href="../03-线程的虚假唤醒/readme.html">
+            
+                    
+                    线程的虚假唤醒
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="../04-等待线程执行终止的join方法/readme.html">
+            
+                <a href="../04-等待线程执行终止的join方法/readme.html">
+            
+                    
+                    等待线程执行终止的join方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="../05-让线程睡眠的sleep方法/readme.html">
+            
+                <a href="../05-让线程睡眠的sleep方法/readme.html">
+            
+                    
+                    让线程睡眠的sleep方法
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.6" data-path="../06-线程中断/readme.html">
+            
+                <a href="../06-线程中断/readme.html">
+            
+                    
+                    线程中断
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.2.7" data-path="readme.html">
+            
+                <a href="readme.html">
+            
+                    
+                    理解线程上下文切换
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.8" data-path="../08-线程死锁/readme.html">
+            
+                <a href="../08-线程死锁/readme.html">
+            
+                    
+                    线程死锁
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.9" data-path="../09-守护线程与用户线程/readme.html">
+            
+                <a href="../09-守护线程与用户线程/readme.html">
+            
+                    
+                    守护线程与用户线程
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../../02-线程进阶/readme.html">
+            
+                <a href="../../02-线程进阶/readme.html">
+            
+                    
+                    线程进阶
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.3.1" data-path="../../02-线程进阶/01-什么是多线程并发和并行/readme.html">
+            
+                <a href="../../02-线程进阶/01-什么是多线程并发和并行/readme.html">
+            
+                    
+                    什么是多线程并发和并行
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.2" data-path="../../02-线程进阶/02-什么是线程安全问题/readme.html">
+            
+                <a href="../../02-线程进阶/02-什么是线程安全问题/readme.html">
+            
+                    
+                    什么是线程安全问题
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.3" data-path="../../02-线程进阶/03-什么是共享变量的内存可见性问题/readme.html">
+            
+                <a href="../../02-线程进阶/03-什么是共享变量的内存可见性问题/readme.html">
+            
+                    
+                    什么是共享变量的内存可见性问题
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.4" data-path="../../02-线程进阶/04-什么是Java中原子性操作/readme.html">
+            
+                <a href="../../02-线程进阶/04-什么是Java中原子性操作/readme.html">
+            
+                    
+                    什么是Java中原子性操作
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.5" data-path="../../02-线程进阶/05-什么是Java中的CAS操作/readme.html">
+            
+                <a href="../../02-线程进阶/05-什么是Java中的CAS操作/readme.html">
+            
+                    
+                    什么是Java中的CAS操作
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.6" data-path="../../02-线程进阶/06-AtomicLong实现原理/readme.html">
+            
+                <a href="../../02-线程进阶/06-AtomicLong实现原理/readme.html">
+            
+                    
+                    AtomicLong实现原理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.7" data-path="../../02-线程进阶/07-什么是Java指令重排序/readme.html">
+            
+                <a href="../../02-线程进阶/07-什么是Java指令重排序/readme.html">
+            
+                    
+                    什么是Java指令重排序
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.8" data-path="../../02-线程进阶/08-Java中Synchronized关键字的内存语义是什么/readme.html">
+            
+                <a href="../../02-线程进阶/08-Java中Synchronized关键字的内存语义是什么/readme.html">
+            
+                    
+                    Java中Synchronized关键字的内存语义是什么
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.9" data-path="../../02-线程进阶/09-Java中Volatile关键字的内存语义是什么/readme.html">
+            
+                <a href="../../02-线程进阶/09-Java中Volatile关键字的内存语义是什么/readme.html">
+            
+                    
+                    Java中Volatile关键字的内存语义是什么
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.10" data-path="../../02-线程进阶/10-伪共享/readme.html">
+            
+                <a href="../../02-线程进阶/10-伪共享/readme.html">
+            
+                    
+                    伪共享
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.11" data-path="../../02-线程进阶/11-锁/readme.html">
+            
+                <a href="../../02-线程进阶/11-锁/readme.html">
+            
+                    
+                    锁
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="../../03-线程原理分析/readme.html">
+            
+                <a href="../../03-线程原理分析/readme.html">
+            
+                    
+                    线程原理分析
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="../../03-线程原理分析/01-ThreadLocal的实现原理/readme.html">
+            
+                <a href="../../03-线程原理分析/01-ThreadLocal的实现原理/readme.html">
+            
+                    
+                    ThreadLocal的实现原理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="../../03-线程原理分析/02-InheritableThreadLocal的实现原理/readme.html">
+            
+                <a href="../../03-线程原理分析/02-InheritableThreadLocal的实现原理/readme.html">
+            
+                    
+                    InheritableThreadLocal的实现原理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="../../03-线程原理分析/03-ThreadLocalRandom类原理剖析/readme.html">
+            
+                <a href="../../03-线程原理分析/03-ThreadLocalRandom类原理剖析/readme.html">
+            
+                    
+                    ThreadLocalRandom类原理剖析
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="../../03-线程原理分析/04-ThreadLocal的使用场景/readme.html">
+            
+                <a href="../../03-线程原理分析/04-ThreadLocal的使用场景/readme.html">
+            
+                    
+                    ThreadLocal的使用场景
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本書使用 GitBook 釋出
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../.." >理解线程上下文切换</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="../06-线程中断/readme.html" class="navigation navigation-prev " aria-label="Previous page: 线程中断">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="../08-线程死锁/readme.html" class="navigation navigation-next " aria-label="Next page: 线程死锁">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"理解线程上下文切换","level":"1.2.7","depth":2,"next":{"title":"线程死锁","level":"1.2.8","depth":2,"path":"01-线程基础/08-线程死锁/readme.md","ref":"01-线程基础/08-线程死锁/readme.md","articles":[]},"previous":{"title":"线程中断","level":"1.2.6","depth":2,"path":"01-线程基础/06-线程中断/readme.md","ref":"01-线程基础/06-线程中断/readme.md","articles":[]},"dir":"neutral"},"config":{"plugins":["baidu","-livereload","livereload"],"license":"MIT","ignores":["_book",".idea","node_modules"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"baidu":{"token":"a489f5ed40abc3a60e2783e8019"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","repository":{"type":"git","url":"https://github.com/jxzsxsp/java-concurrent-programming.git"},"keywords":["Java并发编程"],"author":"Sean.Xiao<jxzsxsp@qq.com>","homepage":"http://imfly.github.io/bitcoin-on-nodejs","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"bookname":"Java并发编程由浅入深","sortedBy":"-","variables":{},"language":"zh","gitbook":"*","description":"我的第一本免费电子书籍","bugs":{"url":"https://github.com/jxzsxsp/java-concurrent-programming/issues"}},"file":{"path":"01-线程基础/07-理解线程上下文切换/readme.md","mtime":"2018-06-29T11:22:29.365Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-06-29T11:49:28.775Z"},"basePath":"../..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-baidu/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
